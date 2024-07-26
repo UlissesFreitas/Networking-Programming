@@ -1,29 +1,21 @@
+# Importando a biblioteca socket
 import socket
 
-HOST = '127.0.0.1' #Definindo o IP do servidor
+HOST = '10.88.0.4' #Definindo o IP do servidor
 PORT = 50000 #Definindo a porta
 
 # Criando o socket UDP
-udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+tcp_socket.connect((HOST, PORT)) # Ligando o socket a porta
 
-while True:
+msg = input('Digite a mensagem: ')
 
-    # Recebe a mensagem a ser enviada
-    msg = input('Digite a mensagem: ')
+# Convertendo a mensagem digitada de string para bytes
+msg = msg.encode('utf-8')
 
-    # Convertendo a mensagem digitada de string para bytes
-    msg = msg.encode('utf-8')
-
-    # Enviando a mensagem ao servidor
-    udp_socket.sendto(msg, (HOST, PORT))
-    
-    # Recebendo a mensagem do servidor
-    msg, cliente = udp_socket.recvfrom(512)
-
-    # Exibe a mensagem recebida
-    print(cliente, msg.decode('utf-8'))
-
+# Enviando a mensagem ao servidor
+tcp_socket.send(msg)
 
 # Fechando o socket
-udp_socket.close()
+tcp_socket.close()
