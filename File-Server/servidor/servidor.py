@@ -1,10 +1,9 @@
-import os
+# Importando a biblioteca socket
 import socket
 
-HOST = ''
-PORT = 12345
+HOST = '' #Definindo o IP do servidor
+PORT = 50000 #Definindo a porta
 MAX_SIZE = 4294967296
-
 
 # status de erro interno do servidor
 STATUS_ISE = 500
@@ -20,7 +19,6 @@ STATUS_FOUND  = 302
 
 # status 200 ok arquivo enviado
 STATUS_OK = 200
-
 
 # Retorna uma lista com os arquivos disponiveis na pasta de 
 # Funcao 100% pronta
@@ -52,40 +50,21 @@ def VerificaArquivo(fileName):
     return True
 
 
-# Cria o socket 
-tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# liga o socket a porta
-tcp_socket.bind((HOST, PORT))
 
-tcp_socket.listen(1)
+# Criando o socket TCP
+tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+tcp_socket.bind((HOST, PORT)) # Ligando o socket a porta
+tcp_socket.listen(1) # Máximo de conexões enfileiradas
+print('Recebendo Mensagens...\n\n')
 
 while True:
-    print('oi')
-    # Aceita a conexao do cliente
-    con, cliente = tcp_socket.accept()
-
+    con, cliente = tcp_socket.accept() # Aceita a conexão com o cliente
     print('Conectado por: ', cliente)
+    while True:
+        msg = con.recv(1024) #buffer de 1024 bytes
+        if not msg: break
+        # Imprimindo a mensagem recebida convertendo de bytes para string
+        print(cliente, msg.decode('utf-8'))
+        print('Finalizando Conexão do Cliente ', cliente)
 
-    # Recebe o primeiro comando do cliente
-    data = con.recv(1024)
-    if not data: break
-
-
-
-
-    """
-    # Verifica se o arquivo existe no diretório local
-    if VerificaArquivo(fileName):
-        # Envia o arquivo para o cliente
-        with open(strDiretorio + fileName, 'rb') as file:
-            data = file.read(1024)
-            while data:
-                socket.sendall(data)
-                data = file.read(1024)
-
-    else:
-        # eviar mensagem dizendo que o arquivo nao existe
-        socket.sendall('Arquivo nao existe'.encode('utf-8'))
-    """
-
-socket.close()
+    con.close()
