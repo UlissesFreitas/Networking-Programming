@@ -1,0 +1,124 @@
+# Importando as bibliotecas
+import socket
+import os 
+
+# Definindo o IP do servidor
+HOST = ''
+
+# Definindo a porta
+PORT = 50004
+
+# Tamanho maximo de um arquivo
+MAX_SIZE = 4294967296
+
+# status de erro interno do servidor
+STATUS_ISE = '500'
+
+# status 404 arquivo nao encontrado
+STATUS_NOT_FOUND = '404'
+
+# status 400 requisicao invalida
+STATUS_BAD = '400'
+
+# status 302 arquivo encontrado
+STATUS_FOUND = '302'
+
+# status 200 ok
+STATUS_OK = '200'
+
+# Comandos para listar os arquivos
+CMD_LS = 'LS'
+
+# Comando para enviar
+CMD_GET = 'GET'
+
+# Retorna uma lista com os arquivos disponiveis na pasta de 
+# Funcao 100% pronta
+def listar_arquivos():
+    # Obtendo o diretório corrente
+    strDiretorio = os.path.abspath(__file__)
+    strDiretorio = os.path.dirname(strDiretorio)
+    strDiretorio = strDiretorio + '/arquivos/'
+
+    result = ' '
+    for arq in os.listdir(strDiretorio):
+        result += arq + ' '
+
+    return result
+
+    #   print('\033[32m' +  i + '\033[0;0m'
+
+def VerificaNomeArquivo(filename):
+    strDiretorio = os.path.abspath(__file__)
+    strDiretorio = os.path.dirname(strDiretorio)
+    strDiretorio = strDiretorio + '/arquivos/'
+
+    if not filename:
+        return False
+    if not os.path.exists(strDiretorio + filename):
+        return False
+    
+    return True
+
+
+# Criando o socket TCP
+tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+# Ligando o socket a porta
+tcp_socket.bind((HOST, PORT))
+
+# Máximo de conexões enfileiradas
+tcp_socket.listen(1)
+
+
+print('Servidor iniciado...\n\n')
+
+while True:
+
+    print('Esperando uma nova conexao')
+
+    # Aceita a conexão com o cliente
+    con, cliente = tcp_socket.accept()
+    print('Conectado por: ', cliente)
+    
+    
+    while True:
+        # Espera o primeiro comando
+        cmd = con.recv(5000)
+        cmd = cmd.decode('utf-8')
+
+        if cmd == CMD_LS:
+            print('LS')
+            # Cria uma string com o nome dos arquivos
+            lista = listar_arquivos()
+
+            # envia um ok para o cliente
+            con.sendall(STATUS_OK.encode('utf-8'))
+
+            # Envia a lista de arquivos existentes
+            con.sendall(lista.encode('utf-8'))
+
+        # Enviar arquivo
+        elif cmd == CMD_GET:
+            print('GET')
+            # recebe o nome do arquivo a ser enviado
+            arq = con.recv(1024)
+
+            # Analisa se o nome do arquivo e valido, se o arquivo existe
+            # caso o arquivo nao exista retorna um codigo de erro ao cliente
+            if not VerificaNomeArquivo(arq):
+                con.sendall(STATUS_NOT_FOUND.encode('utf-8'))
+        else:
+            print('BAD REQUEST', cliente)
+            con.sendall(STATUS_BAD.encode('utf-8'))
+
+
+
+        # Imprimindo a mensagem recebida convertendo de bytes para string
+        #print(cliente, msg)
+        
+
+
+
+# THE END
+con.close()

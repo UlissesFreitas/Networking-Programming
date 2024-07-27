@@ -1,0 +1,91 @@
+# Importando a biblioteca socket
+import socket
+
+# Definindo o IP do servidor# Definindo a porta
+HOST = '192.168.1.100' 
+
+# Definindo a porta
+PORT = 50004
+
+# Tamanho maximo de um arquivo
+MAX_SIZE = 4294967296
+
+# status de erro interno do servidor
+STATUS_ISE = '500'
+
+# status 404 arquivo nao encontrado
+STATUS_NOT_FOUND = '404'
+
+# status 400 requisicao invalida
+STATUS_BAD = '400'
+
+# status 302 arquivo encontrado
+STATUS_FOUND = '302'
+
+# status 200 ok arquivo enviado
+STATUS_OK = '200'
+
+# Comandos para listar os arquivos
+CMD_LS = 'LS'
+
+# Comando para enviar
+CMD_GET = 'GET'
+
+
+# Criando o socket UDP
+tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+tcp_socket.connect((HOST, PORT)) # Ligando o socket a porta
+
+
+while True:
+    cmd = input('Digite um comando: ')
+    
+    if not cmd:
+        continue
+
+    # Convertendo a mensagem digitada de string para bytes
+    cmd = cmd.upper().encode('utf-8')
+
+    # Enviando o comando ao servidor
+    tcp_socket.sendall(cmd)
+
+    # Espera o codigo de status enviado pelo servidor
+    status = tcp_socket.recv(5)
+
+    # O comando estava errado
+    if status.decode('utf-8') == STATUS_BAD:
+        print( '\033[1;31m' + 'Comando invalido' + '\033[0;0m')     
+    
+    # pediu a lista de arquivos
+    elif status.decode('utf-8') == STATUS_OK:
+        print('\033[32m' + 'Lista de Arquivos'+ '\033[0;0m')
+        lista = tcp_socket.recv(4096)
+        lista = lista.decode('utf-8')
+        lista = lista.split(' ')
+        
+        for l in lista:
+            print('\033[32m' +  l + '\033[0;0m')
+
+    # pediu um arquivo que nao existe
+    elif status.decode('utf-8') == STATUS_NOT_FOUND:
+        print('\033[1;31m' + 'Arquivo nao encontrado' + '\033[0;0m')
+    
+    # pediu um arquivo que existe e sera enviado
+    elif status.decode('utf-8') == STATUS_FOUND:
+        print('\033[32m' + 'Arquivo encontrado'+ '\033[0;0m')
+
+        # recebe o arquivo
+        tcp_socket.recv(MAX_SIZE)
+    
+    else:
+        print('Erro interno do servidor')
+        
+
+    
+
+
+
+
+# Fechando o socket
+tcp_socket.close()
