@@ -6,7 +6,7 @@ import os
 HOST = '10.88.0.4' 
 
 # Definindo a porta
-PORT = 50008
+PORT = 5000
 
 # Tamanho maximo de um arquivo
 MAX_SIZE = 4294967296
@@ -123,7 +123,7 @@ while True:
             
             try:
                 posi = int(input(f'Local de inicio MAX({size}): '))
-                if posi > size or posi < 1: raise ValueError
+                if posi > size or posi < 0: raise ValueError
             
             except:
                 print('\033[1;31m' + 'local invalido' + '\033[0;0m')
